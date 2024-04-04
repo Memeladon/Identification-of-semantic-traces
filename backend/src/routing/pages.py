@@ -3,19 +3,20 @@ from starlette.templating import Jinja2Templates
 from starlette.requests import Request
 
 pageRouter = APIRouter(
-    # prefix='/weather',
+    prefix='/iost',
     tags=['IoST'],
     responses={404: {"description": "Not found"}}
 )
 
-templates = Jinja2Templates(directory='./internal/templates')
+templates = Jinja2Templates(directory='./staticfiles/templates')
 
 
 @pageRouter.get('/')
 def get_main_page(request: Request):
-    return templates.TemplateResponse("index.html", {'request': request})
+    return templates.TemplateResponse("mainpage.html", {'request': request})
 
 
 @pageRouter.get('/login')
 def get_main_page(request: Request):
     return templates.TemplateResponse("login.html", {'request': request})
+

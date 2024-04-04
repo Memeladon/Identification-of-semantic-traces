@@ -1,0 +1,33 @@
+version: '3.10'
+
+services:
+
+ backend:
+    build: ./backend
+    ports:
+      - 5000:5000
+    volumes:
+      - ./backend:/app
+    command: uvicorn src.srv:app --reload --host 0.0.0.0 --port 5000
+
+ frontend:
+    build: ./frontend
+    volumes:
+      - './frontend:/app'
+      - '/app/node_modules'
+    ports:
+      - 8080:8080
+
+ db:
+    image: postgres:16.2
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=5973714m
+      - POSTGRES_DB=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+volumes:
+ postgres_data:
