@@ -8,7 +8,7 @@ def register_pony_orm(app: FastAPI, config: dict, generate_schemas: bool = False
     # Инициализация соединения с базой данных
     db.bind(**config['connections']['default'])
     if generate_schemas:
-        db.generate_mapping(create_tables=True)  # Вызывается после db.bind()
+        db.generate_mapping(create_tables=True)
 
     @app.on_event("startup")
     async def init_orm():

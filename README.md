@@ -42,6 +42,8 @@
     ├── backend
     │   ├── Dockerfile
     │   ├── requirements.txt
+    │   ├── migrations
+    │   │   └── models
     │   └── src
     │       ├── settings.py
     │       ├── srv.py
@@ -50,7 +52,13 @@
     │       │   ├── crud.py
     │       │   ├── models.py
     │       │   ├── postgres_script.sql
-    │       │   └── register.py
+    │       │   ├── register.py
+    │       │   └── schemas
+    │       │       ├── chat.py
+    │       │       ├── chat_of_interest.py
+    │       │       ├── site_user.py
+    │       │       ├── user.py
+    │       │       └── user_of_interest.py
     │       ├── lsa
     │       │   └── identification.py
     │       ├── routing
