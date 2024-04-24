@@ -6,11 +6,11 @@ from .database.config import PONY_ORM_CONFIG
 from .database.register import register_pony_orm
 
 from .routing.pages import pageRouter
-from .settings import PROJECT_NAME, PROJECT_VERSION
+from .settings import Settings
 
 
 
-app = FastAPI(title=PROJECT_NAME, version=PROJECT_VERSION)
+app = FastAPI(title=Settings.PROJECT_NAME, version=Settings.PROJECT_VERSION)
 
 # ------------ Routing ------------ #
 # app.mount("/staticfiles", StaticFiles(directory="./staticfiles"), name="staticfiles")
