@@ -24,6 +24,7 @@ class Chat_of_interest(db.Entity):
 
 class Chat(db.Entity):
     id = PrimaryKey(int, auto=True)
+    site_user = Required(Site_user)
     chat_of_interest = Optional(Chat_of_interest)
     title = Required(str)
     type = Required(str)
