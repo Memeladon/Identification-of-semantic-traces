@@ -17,13 +17,13 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-async def get_user(username: str):
+async def get_site_user(username: str):
     return await Site_userDatabaseSchema.from_queryset_single(Site_user.get(username=username))
 
 
-async def validate_user(user: OAuth2PasswordRequestForm = Depends()):
+async def validate_site_user(user: OAuth2PasswordRequestForm = Depends()):
     try:
-        db_user = await get_user(user.username)
+        db_user = await get_site_user(user.username)
     except ObjectNotFound:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

@@ -8,4 +8,9 @@ psycopg2~=2.9.9
 psycopg2-binary~=2.9.9
 bcrypt~=4.1.2
 jose~=1.0.0
+ecdsa==0.19.0
+pyasn1==0.6.0
+python-jose==3.3.0
+rsa==4.9
 passlib~=1.7.4
+python-multipart~=0.0.9

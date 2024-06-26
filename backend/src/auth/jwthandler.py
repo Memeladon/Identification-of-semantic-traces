@@ -9,9 +9,9 @@ from fastapi.security.utils import get_authorization_scheme_param
 from jose import JWTError, jwt
 from pony.orm import ObjectNotFound
 
-from backend.src.schemas.token import TokenData
-from backend.src.schemas.site_user import Site_userOutSchema
-from backend.src.database.models import Site_user
+from..schemas.token import TokenData
+from..schemas.site_user import Site_userOutSchema
+from..database.models import Site_user
 # python-jose==3.3.0
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
@@ -66,7 +66,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 
-async def get_current_user(token: str = Depends(security)):
+async def get_current_site_user(token: str = Depends(security)):
     credentials_exception = HTTPException(
         status_code=401,
         detail="Could not validate credentials",

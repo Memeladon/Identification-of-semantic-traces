@@ -1,18 +1,20 @@
 from fastapi import HTTPException
 from passlib.context import CryptContext
-from pony.orm import commit, IntegrityError, ObjectNotFound
+from pony.orm import commit, IntegrityError, ObjectNotFound, select
 from bcrypt import gensalt, hashpw
-from typing import Union, Optional
+from typing import Union, Optional, List
 
 from .models import Site_user, Chat_of_interest, Chat, User_of_interest, User
-from backend.src.schemas.site_user import Site_userInSchema, Site_userOutSchema
-from backend.src.schemas.user import User
-from backend.src.schemas.user_of_interest import UserOfInterest
-from backend.src.schemas.chat import Chat
-from backend.src.schemas.chat_of_interest import ChatOfInterest
-from backend.src.schemas.token import Status
+from..schemas.site_user import Site_userInSchema, Site_userOutSchema
+from..schemas.user import User
+from..schemas.user_of_interest import UserOfInterest
+from..schemas.chat import ChatInSchema, ChatOutSchema
+from..schemas.chat_of_interest import ChatOfInterest
+from..schemas.token import Status
+
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# TODO: Update all models/crud (like site_user models/functions)
 
 
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
@@ -20,6 +22,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 def create_site_user(user: Site_userInSchema) -> Site_userOutSchema:
     user.password = pwd_context.encrypt(user.password)
+
     try:
         user_obj = Site_user(**user.dict(exclude_unset=True))
         commit()
@@ -40,16 +43,13 @@ def create_chat_of_interest(site_user_id: int, name: Optional[str]) -> Union[Cha
         raise HTTPException(status_code=500, detail=str(e))
 
 
-def create_chat(chat_of_interest_id: int, title: str, type: str, last_message: Optional[str],
-                chatPhoto: Optional[str], interest_status: int) -> Union[Chat, str]:
+def create_chat(chat: ChatInSchema, site_user: Site_userOutSchema) -> ChatOutSchema:
     try:
-        chat_of_interest = Chat_of_interest.get(id=chat_of_interest_id)
-        chat = Chat(chat_of_interest=chat_of_interest, title=title, type=type, last_message=last_message,
-                    chatPhoto=chatPhoto, interest_status=interest_status)
+        chat = Chat(**chat.dict(exclude_unset=True), site_user=site_user.id)
         commit()
         return chat
     except IntegrityError:
-        raise HTTPException(status_code=400, detail="Chat of interest not found")
+        raise HTTPException(status_code=400, detail="Chat already exists.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -103,14 +103,23 @@ def get_chat_of_interest(id: int) -> Union[ChatOfInterest, str]:
         raise HTTPException(status_code=404, detail="Chat of interest not found")
 
 
-def get_chat(id: int) -> Union[Chat, str]:
+def get_chat(id: int) -> ChatOutSchema:
     try:
         chat = Chat[id]
-        return Chat(id=chat.id, chat_of_interest=chat.chat_of_interest.id if chat.chat_of_interest else None,
-                    title=chat.title, type=chat.type, last_message=chat.last_message, chatPhoto=chat.chatPhoto,
-                    interest_status=chat.interest_status)
+        return ChatOutSchema.from_orm(chat)
     except ObjectNotFound:
         raise HTTPException(status_code=404, detail="Chat not found")
+
+
+def get_all_chats() -> List[ChatOutSchema]:
+    try:
+        chats = select(chat for chat in Chat)[:]
+        return [ChatOutSchema(id=chat.id, title=chat.title, type=chat.type, last_message=chat.last_message,
+                              chatPhoto=chat.chatPhoto, interest_status=chat.interest_status,
+                              created_at=chat.created_at.strftime('%Y-%m-%d %H:%M:%S'))
+                for chat in chats]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 def get_user_of_interest(id: int) -> Union[UserOfInterest, str]:
@@ -208,7 +217,7 @@ def update_user(id: int, first_name: Optional[str] = None, last_name: Optional[s
 # ---------------------------------------------------- DELETE ---------------------------------------------------- #
 # //////////////////////////////////////////////////////////////////////////////////////////////////////////////// #
 
-def delete_site_user(user_id: int, current_user: Site_user) -> Status:
+def delete_site_user(user_id: int, current_user: Site_userOutSchema) -> Status:
     try:
         db_user = Site_user[user_id]
     except ObjectNotFound:
